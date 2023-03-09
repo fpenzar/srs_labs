@@ -33,6 +33,7 @@ class PasswordManager:
             exit()
         
         self.filename = "passwords.txt"
+        self.placeholder_value = {}
         
         # execute command
         args = sys.argv[3:]
@@ -42,9 +43,10 @@ class PasswordManager:
     def init(self, *args):
         # init a new pwd_file
         with open(self.filename, "w") as file:
+            encoded_placeholder = self.encode_passwords(self.placeholder_value)
             file.write(json.dumps({
-                "contents": "",
-                "mac": "",
+                "contents": encoded_placeholder.hex(),
+                "mac": self.get_mac(encoded_placeholder),
             }))
         print("Password manager initialized")
     
@@ -63,9 +65,6 @@ class PasswordManager:
     
 
     def integrity_check(self, file_contents):
-        if len(file_contents["contents"]) == 0:
-            return True
-        
         b_contents = bytes.fromhex(file_contents["contents"])
         h = HMAC.new(self.integrity_key, digestmod=SHA256)
         h.update(b_contents)
@@ -109,10 +108,7 @@ class PasswordManager:
             print("Master password incorrect or integrity check failed.")
             exit()
         
-        if len(file_contents["contents"]) == 0:
-            passwords = {}
-        else:
-            passwords = json.loads(self.decode_passwords(file_contents["contents"]))
+        passwords = json.loads(self.decode_passwords(file_contents["contents"]))
         passwords[address] = password
         encoded_pwds = self.encode_passwords(passwords)
         file_contents["contents"] = encoded_pwds.hex()
@@ -137,10 +133,7 @@ class PasswordManager:
             print("Master password incorrect or integrity check failed.")
             exit()
         
-        if len(file_contents["contents"]) == 0:
-            passwords = {}
-        else:
-            passwords = json.loads(self.decode_passwords(file_contents["contents"]))
+        passwords = json.loads(self.decode_passwords(file_contents["contents"]))
         if address not in passwords.keys():
             print("Specified address not saved!")
             exit()
