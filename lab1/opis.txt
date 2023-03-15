@@ -1,0 +1,15 @@
+U datoteku "passwords" u json formatu {"contents": STRING, "mac": STRING, "salt": STRING} spremaju se potrebne informacije.
+- "contents" predstavlja kriptiranu json strukturu adresi i lozinki
+- "mac" je Message Authentication Code koji je dobiven hashiranjem kriptiranih lozinki te služi za provjeru integriteta
+- "salt" je slučajno generiranih 16 bajtova kod inicijalizacije koji se koriste kod derivacije ključeva iz Master lozinke
+
+Iz Master lozinke i salta deriviraju se dva 256-bitna ključa pomoću PBKDF2 algoritma.
+Podaci se spremaju zajedno u json strukturu gdje je adresa ključ, a lozinka vrijednost.
+Podaci se kriptiraju prvim 256-bitnim ključem algoritmom Salsa20.
+Nad kriptiranim podacima i uz pomoć drugog 256-bitnog ključa, radi se MAC pomoću HMAC algoritma.
+
+SIGURNOSNI ZAHTJEVI
+1) Povjerljivost lozinki: Budući su svi podaci zajedno kriptirani u json strukturi, nije moguće odrediti nikakve informacije o individualnim lozinkama.
+2) Povjerljivost adresa: Isti argument kao pod 1)
+3) Integritet adresa i zaporki: Kod svake operacije čitanja ili pisanja, prvo se provjerava integritet tako da se računa MAC nad podacima, 
+                                te uspoređuje s onim zapisanim u datoteci.
