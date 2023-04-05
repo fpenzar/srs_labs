@@ -1,9 +1,9 @@
-Lozinke su zaštićene (djelomično) tokom unosa, jer se ne prikazuju u plain text u terminalu. (ne sprječava da netko gleda slova na tipkovnici koja tipkamo)
+Lozinke su zaštićene (djelomično) tokom unosa, jer se ne prikazuju prilikom unosa kroz terminal. (ne sprječava da netko gleda slova na tipkovnici koja tipkamo)
 Sigruna pohrana lozinki:
     pohranjuje se salt (16 byteova) uz kriptografski sažetak passworda + salta (SHA256).
     Na ovaj način napadač ne može isčitati lozinku iz datoteke.
     Spriječava se pogađanje (otpornost na rainbow attack).
-    Iste lozinke nemaju istu spremljenu vrijednost.
+    Iste lozinke nemaju istu spremljenu vrijednost, čak niti kod promjene lozinke u istu lozinku.
 
 Lozinka mora biti dugačka barem 8 znakova (minimalna kompleksnost lozinke). Ne forsira se ništa strože od toga da se olakša korištenje programa, ovo je više proof of concept.
 Salt se za svaku novu/promijenjenu lozinku generira slučajno, kako bi se otežalo pogađanje lozinki.
