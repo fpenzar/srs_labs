@@ -1,20 +1,11 @@
-from Crypto.Hash import SHA256
-from Crypto.Random import get_random_bytes
 from constants import FILE
 import sys
-import json
 from getpass import getpass
-from usermgmt import hash
+from usermgmt import hash, read_passwords, write_passwords, handle_new_pwd, create_new_pwd_hash
 
 
 def login(user):
-    with open(FILE, "r") as file:
-        file_contents = file.read()
-        if not file_contents:
-            passwords = {}
-        else:
-            passwords = json.loads(file_contents)
-    
+    passwords = read_passwords()
     
     pwd_valid = False
     while not pwd_valid:
@@ -39,26 +30,18 @@ def login(user):
         return
     
     # change password part
-    pwd = ""
-    while len(pwd) < 8:
-        print("[INFO] New password must be at least 8 characters long")
-        pwd = getpass("New password: ")
-    pwd_repeat = getpass("Repeat new password: ")
-
-    if pwd != pwd_repeat:
+    print("NEW PASSWORD REQUIRED!")
+    pwd_ok, pwd = handle_new_pwd()
+    if not pwd_ok:
         print("Password change fail. Password mismatch.")
         return
     
-    salt = get_random_bytes(16)
-    pwd_bytes = str.encode(pwd)
-    salted_pwd_binary = pwd_bytes + salt
-    hashed = hash(salted_pwd_binary)
+    hashed, salt = create_new_pwd_hash(pwd)
     passwords[user]["pwd"] = hashed.hex()
     passwords[user]["salt"] = salt.hex()
     passwords[user]["change_pwd"] = False
 
-    with open(FILE, "w") as file:
-        file.write(json.dumps(passwords))
+    write_passwords(passwords)
     
     print("Login successful!")
 
@@ -67,11 +50,8 @@ if __name__ == "__main__":
     if len(sys.argv) != 2:
         print(f"Wrong usage: Expected 1 arg, got {len(sys.argv) - 1} instead")
         exit(1)
-    
     user = sys.argv[1]
-
     # create file if missing
     with open(FILE, "a") as file:
         pass
-
     login(user)
